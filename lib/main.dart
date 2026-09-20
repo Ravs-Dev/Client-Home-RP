@@ -1,123 +1,101 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:android_intent_plus/flag.dart';
+import '../pages/preset_page.dart';
 
-import 'screens/home_screen.dart';
-import 'screens/server_list_screen.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/settings_screen.dart';
-import 'screens/video_screen.dart';
-
-// Config State Global Aplikasi (Dedicated IP & User Info)
-class AppConfig {
-  static String nickname = "Player_Name";
-  static String serverIp = "165.101.18.181";
-  static int serverPort = 7001;
-  static bool fastConnect = true;
-  static bool fpsCounter = false;
-}
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Kunci layar ke Landscape ala Launcher Game
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]).then((_) {
-    runApp(const HomeRoleplayApp());
-  });
-}
-
-class HomeRoleplayApp extends StatelessWidget {
-  const HomeRoleplayApp({super.key});
+class MainScreen extends StatelessWidget {
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'HomeRoleplay Launcher',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF0EA5E9),
-          surface: Color(0xFF1E293B),
-        ),
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("HomeRoleplay Client"),
+        centerTitle: true,
       ),
-      home: const HomeScreen(),
-      routes: {
-        '/home': (context) => const HomeScreen(),
-        '/dashboard': (context) => const DashboardScreen(),
-        '/servers': (context) => const ServerListScreen(),
-        '/settings': (context) => const SettingsScreen(),
-        '/video': (context) => const VideoScreen(),
-      },
-    );
-  }
-}
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Header Logo & Banner
+                      Column(
+                        children: [
+                          Icon(Icons.gamepad, size: screenHeight * 0.12, color: Colors.blueAccent),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "SA-MP Mobile Launcher",
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                          const Text(
+                            "HomeRoleplay Community",
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          ),
+                        ],
+                      ),
 
-// ==========================================
-// FUNGSI PELUNCUR GAME SA-MP CLIENT
-// ==========================================
-Future<void> launchSAMPGame(BuildContext context) async {
-  final String sampData = "samp://${AppConfig.serverIp}:${AppConfig.serverPort}?name=${AppConfig.nickname}";
-  final Uri sampUri = Uri.parse(sampData);
+                      // Daftar Tombol Aksi Utama
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Tombol Main Game
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              backgroundColor: Colors.green,
+                            ),
+                            onPressed: () {
+                              // Panggil intent / logika buka game SA-MP
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Membuka Game SA-MP...")),
+                              );
+                            },
+                            icon: const Icon(Icons.play_arrow, color: Colors.white),
+                            label: const Text(
+                              "MAIN GAME",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                          ),
 
-  // 1. Coba via URL Launcher (Universal Scheme)
-  try {
-    if (await canLaunchUrl(sampUri)) {
-      await launchUrl(sampUri, mode: LaunchMode.externalApplication);
-      return;
-    }
-  } catch (e) {
-    debugPrint("Scheme launch error: $e");
-  }
+                          const SizedBox(height: 12),
 
-  // 2. Fallback via Android Intent di Perangkat Android
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-    final List<String> clientPackages = [
-      "ru.unisamp_mobile.game",
-      "com.samp.mobile",
-      "com.nv.sampmobile",
-      "com.rockstargames.gtasa",
-      "com.br.top.samp",
-    ];
-
-    bool launched = false;
-    for (String packageName in clientPackages) {
-      try {
-        final AndroidIntent intent = AndroidIntent(
-          action: 'android.intent.action.VIEW',
-          data: sampData,
-          package: packageName,
-          flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
-        );
-
-        await intent.launch();
-        launched = true;
-        break;
-      } catch (e) {
-        debugPrint("Gagal membuka package $packageName: $e");
-      }
-    }
-
-    if (launched) return;
-  }
-
-  // 3. Notifikasi jika gagal / jika berjalan di Chrome Web
-  if (context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-            kIsWeb
-                ? "Fitur Masuk Kota hanya berfungsi di APK Android (Bukan Browser Web)!"
-                : "Gagal membuka SA-MP Client. Pastikan APK SA-MP Client sudah terpasang!"
+                          // Tombol Navigasi ke Pilihan Preset Data/Grafik
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const PresetPage()),
+                              );
+                            },
+                            icon: const Icon(Icons.file_download),
+                            label: const Text(
+                              "DOWNLOAD DATA / GRAFIK",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
-        backgroundColor: Colors.redAccent,
-        duration: const Duration(seconds: 4),
       ),
     );
   }

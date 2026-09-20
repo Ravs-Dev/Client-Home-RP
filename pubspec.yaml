@@ -40,6 +40,7 @@ dependencies:
   dio: ^5.4.0
   archive: ^3.4.10
   shared_preferences: ^2.2.2
+  connectivity_plus: ^6.0.0
   permission_handler: ^11.3.1
 
   # The following adds the Cupertino Icons font to your application.
@@ -76,7 +77,6 @@ flutter:
     - assets/flutter_assets/assets/
     - assets/flutter_assets/assets/bg/
     - assets/videos/               # (Video yang sudah ada)
-    - assets/data/
     - assets/data/script/           # ← TAMBAHKAN BARIS INI (File data SA-MP kamu)
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

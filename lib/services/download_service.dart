@@ -6,17 +6,17 @@ import 'package:permission_handler/permission_handler.dart';
 
 class DownloadService {
   static Future<void> downloadAndInstallData({
-    required String zipUrl, 
+    required String zipUrl,
     required String targetPackageName,
+    Function(double progress)? onProgress,
   }) async {
     // 1. Cek Koneksi Jaringan
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult.contains(ConnectivityResult.none)) {
-      print("Error: Tidak ada koneksi internet. Aktifkan Data Seluler atau Wi-Fi!");
-      return;
+      throw Exception("Tidak ada koneksi internet. Silakan aktifkan Data Seluler atau Wi-Fi!");
     }
 
-    // 2. Minta Izin Storage All Files
+    // 2. Minta Izin Storage (MANAGE_EXTERNAL_STORAGE untuk Android 11+)
     if (Platform.isAndroid) {
       if (!await Permission.manageExternalStorage.request().isGranted) {
         await Permission.storage.request();
@@ -25,25 +25,25 @@ class DownloadService {
 
     try {
       String destinationDirPath = "/storage/emulated/0/Android/data/$targetPackageName/";
-      String tempZipPath = "/storage/emulated/0/Download/temp_data.zip";
+      String tempZipPath = "/storage/emulated/0/Download/temp_game_data.zip";
 
-      // 3. Proses Download
+      // 3. Download File ZIP dari GitHub Release
       Dio dio = Dio();
-      print("Mulai mengunduh file data...");
-      
       await dio.download(
-        zipUrl, 
+        zipUrl,
         tempZipPath,
+        options: Options(
+          followRedirects: true, // Wajib aktif untuk GitHub Release Asset URL
+          maxRedirects: 5,
+        ),
         onReceiveProgress: (received, total) {
-          if (total != -1) {
-            double progress = (received / total) * 100;
-            print("Download Progress: ${progress.toStringAsFixed(0)}%");
+          if (total != -1 && onProgress != null) {
+            onProgress(received / total);
           }
         },
       );
 
-      // 4. Ekstrak File ZIP
-      print("Mengekstrak data ke $destinationDirPath ...");
+      // 4. Ekstrak File ZIP langsung ke folder Android/data/
       File zipFile = File(tempZipPath);
       List<int> bytes = zipFile.readAsBytesSync();
       Archive archive = ZipDecoder().decodeBytes(bytes);
@@ -60,15 +60,12 @@ class DownloadService {
         }
       }
 
-      // 5. Hapus file temp ZIP
+      // 5. Hapus File Temp ZIP
       if (await zipFile.exists()) {
         await zipFile.delete();
       }
-
-      print("Berhasil memasang data!");
-
     } catch (e) {
-      print("Gagal mendownload atau mengekstrak data: $e");
+      throw Exception("Gagal mengunduh/mengekstrak data: $e");
     }
   }
 }
