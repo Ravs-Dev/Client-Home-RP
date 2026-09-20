@@ -1,85 +1,74 @@
 import 'dart:io';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:path_provider/path_provider.dart';
-import 'package:archive/archive_io.dart'; // Package untuk unzip
-import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
+import 'package:archive/archive.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class AssetExtractor {
-  // Path file di dalam folder assets (BUKAN URL INTERNET)
-  static const String sampDataUrl = "https://github.com/Ravs-Dev/Client-Home-RP/releases/download/v1.0.0/samp_data.zip";
-  static const String gangsterDataUrl = "https://github.com/Ravs-Dev/Client-Home-RP/releases/download/v1.0.0/gangster_data.zip";
+class DownloadService {
+  static Future<void> downloadAndInstallData({
+    required String zipUrl, 
+    required String targetPackageName,
+  }) async {
+    // 1. Cek Koneksi Jaringan
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      print("Error: Tidak ada koneksi internet. Aktifkan Data Seluler atau Wi-Fi!");
+      return;
+    }
 
-  // 1. Simpan pilihan grafik user
-  static Future<void> saveGraphicsChoice(String type) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('graphics_type', type);
-  }
+    // 2. Minta Izin Storage All Files
+    if (Platform.isAndroid) {
+      if (!await Permission.manageExternalStorage.request().isGranted) {
+        await Permission.storage.request();
+      }
+    }
 
-  // 2. Cek pilihan grafik user
-  static Future<String?> getGraphicsChoice() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('graphics_type');
-  }
-
-  // 3. Cek apakah data sudah pernah diekstrak
-  static Future<bool> isDataExtracted() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('data_extracted') ?? false;
-  }
-
-  // 4. FUNGSI UTAMA: Baca dari Assets & Ekstrak (TANPA INTERNET)
-  static Future<bool> extractGraphicsData(
-      String graphicsType, {
-        Function(double)? onProgress,
-      }) async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      final targetPath = directory.path;
+      String destinationDirPath = "/storage/emulated/0/Android/data/$targetPackageName/";
+      String tempZipPath = "/storage/emulated/0/Download/temp_data.zip";
 
-      debugPrint('📦 Memproses grafik: $graphicsType');
+      // 3. Proses Download
+      Dio dio = Dio();
+      print("Mulai mengunduh file data...");
+      
+      await dio.download(
+        zipUrl, 
+        tempZipPath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            double progress = (received / total) * 100;
+            print("Download Progress: ${progress.toStringAsFixed(0)}%");
+          }
+        },
+      );
 
-      // Pilih file ZIP berdasarkan pilihan user
-      final assetPath = graphicsType == 'gangster'
-          ? _pathGrafikGangster
-          : _pathGrafikBiasa;
+      // 4. Ekstrak File ZIP
+      print("Mengekstrak data ke $destinationDirPath ...");
+      File zipFile = File(tempZipPath);
+      List<int> bytes = zipFile.readAsBytesSync();
+      Archive archive = ZipDecoder().decodeBytes(bytes);
 
-      if (onProgress != null) onProgress(0.2);
-
-      debugPrint('📂 Membaca file dari dalam APK: $assetPath');
-      // rootBundle.load adalah cara BENAR membaca file assets di Flutter
-      final byteData = await rootBundle.load(assetPath);
-      final fileBytes = byteData.buffer.asUint8List();
-
-      if (onProgress != null) onProgress(0.5);
-
-      debugPrint('⚙️ Mengekstrak isi file ZIP...');
-      // Decode file ZIP
-      final archive = ZipDecoder().decodeBytes(fileBytes);
-
-      int extractedCount = 0;
-      for (final file in archive) {
+      for (ArchiveFile file in archive) {
+        String filename = '$destinationDirPath${file.name}';
         if (file.isFile) {
-          final outFile = File('$targetPath/${file.name}');
-          // Buat folder otomatis jika belum ada
-          await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content as List<int>);
-          extractedCount++;
+          List<int> data = file.content as List<int>;
+          File(filename)
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(data);
+        } else {
+          Directory(filename).createSync(recursive: true);
         }
       }
 
-      // Tandai bahwa ekstrak sudah selesai
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('data_extracted', true);
+      // 5. Hapus file temp ZIP
+      if (await zipFile.exists()) {
+        await zipFile.delete();
+      }
 
-      debugPrint('✅ BERHASIL! $extractedCount file diekstrak ke: $targetPath');
-      if (onProgress != null) onProgress(1.0);
-
-      return true;
+      print("Berhasil memasang data!");
 
     } catch (e) {
-      debugPrint('❌ Gagal mengekstrak data: $e');
-      return false;
+      print("Gagal mendownload atau mengekstrak data: $e");
     }
   }
 }
