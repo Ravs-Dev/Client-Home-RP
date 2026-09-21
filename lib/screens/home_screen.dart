@@ -4,6 +4,7 @@ import '../main.dart';
 import '../widgets/sidebar.dart';
 import '../services/server_query_service.dart';
 import '../services/asset_extractor.dart';
+import '../models/app_config.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'main_screen.dart';
 import 'dashboard_screen.dart';
-// import 'servers_screen.dart'; // Komentari jika filenya belum dibuat
+import 'server_list_screen.dart'; // Komentari jika filenya belum dibuat
 import 'settings_screen.dart';
 import '../widgets/sidebar.dart';
 
@@ -15,11 +16,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 1;
 
   final List<Widget> _pages = [
+    const MainScreen(),
     const DashboardScreen(),
     // Ganti ServersScreen() sementara dengan Widget biasa
-    const Center(
-      child: Text("Halaman Server (Dalam Pengembangan)", style: TextStyle(color: Colors.white)),
-    ),
+    const ServerListScreen(), // Ganti dengan ServersScreen() jika filenya sudah dibuat
     const SettingsScreen(),
   ];
 

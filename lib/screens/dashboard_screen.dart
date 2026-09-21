@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 import '../widgets/server_card.dart';
 import '../widgets/server_detail_panel.dart';
 import '../services/server_query_service.dart';
+import '../screens/main_navigation.dart';
 import '../models/app_config.dart';
 
 class DashboardScreen extends StatefulWidget {

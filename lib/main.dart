@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // Import file project kamu
 import 'screens/main_screen.dart';
+import 'screens/main_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Home Roleplay Launcher',
       theme: ThemeData.dark(),
-      home: const MainScreen(),
+      home: const MainNavigationScreen(),
     );
   }
 }
