@@ -19,6 +19,10 @@ This is a private Flutter project for HomeRoleplay.
 ## Build App
 `
 flutter clean
+`
+`
 flutter pub get
+`
+`
 flutter build apk --release --android-skip-build-dependency-validation
 `
