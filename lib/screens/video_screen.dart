@@ -109,7 +109,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
             content: const Text(
               "Aplikasi SA-MP Client belum terinstall.\n\n"
                   "Silakan install terlebih dahulu:\n"
-                  "• SA-MP Launcher by AlexeyG\n"
+                  "• SA-MP Launcher by Ravs\n"
                   "• SA-MP Mobile",
               style: TextStyle(color: Colors.white70, height: 1.4),
             ),

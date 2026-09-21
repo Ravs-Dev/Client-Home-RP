@@ -3,7 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../main.dart';
 import '../widgets/sidebar.dart';
 import '../services/server_query_service.dart';
-import '../services/asset_extractor.dart'; // ← PERBAIKAN: Ganti download_service dengan asset_extractor
+import '../services/asset_extractor.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _isLoading = true;
 
-  // State untuk Manajemen Grafik Lokal (Bukan Download)
+  // State untuk Manajemen Grafik Lokal
   bool _isDataReady = false;
   bool _isChoosingGraphics = false;
   bool _isExtracting = false;
@@ -38,27 +38,48 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeApp(); // ← PERBAIKAN: Cek status ekstraksi lokal
+    _initializeApp();
     _refreshServerStatus();
   }
 
-  // === PERBAIKAN 1: Cek apakah data sudah diekstrak dari assets ===
+  // === DITAMBAHKAN: Handler perpindahan item Sidebar ===
+  void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+      // Sudah di HomeScreen
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/dashboard');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/servers');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/settings');
+        break;
+    }
+  }
+
+  // === Cek apakah data sudah diekstrak dari assets ===
   Future<void> _initializeApp() async {
     final hasChosen = await AssetExtractor.getGraphicsChoice();
     final isExtracted = await AssetExtractor.isDataExtracted();
 
     if (mounted) {
       if (hasChosen == null || !isExtracted) {
-        // Belum pernah pilih atau belum diekstrak
         setState(() => _isChoosingGraphics = true);
       } else {
-        // Sudah siap
         setState(() => _isDataReady = true);
       }
     }
   }
 
-  // === PERBAIKAN 2: Fungsi untuk menangani pilihan dan ekstraksi ===
+  // === Fungsi penanganan pilihan grafik dan ekstraksi ===
   void _handleGraphicsSelection(String type) async {
     setState(() {
       _isChoosingGraphics = false;
@@ -67,10 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _extractProgress = 0.0;
     });
 
-    // Simpan pilihan user
     await AssetExtractor.saveGraphicsChoice(type);
 
-    // Ekstrak file dari dalam APK (TANPA INTERNET)
     final success = await AssetExtractor.extractGraphicsData(
       type,
       onProgress: (progress) {
@@ -121,22 +140,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Tampilkan Layar Pilihan Grafik (Jika belum pilih)
     if (_isChoosingGraphics) {
       return _buildGraphicsSelectionScreen();
     }
 
-    // 2. Tampilkan Layar Progress Ekstraksi (Sedang proses)
     if (_isExtracting) {
       return _buildExtractingScreen();
     }
 
-    // 3. Fallback jika data belum siap
     if (!_isDataReady) {
       return _buildGraphicsSelectionScreen();
     }
 
-    // 4. Tampilkan Home Screen Normal (Jika sudah siap)
     return _buildNormalHomeScreen();
   }
 
@@ -254,8 +269,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                "Menyiapkan Paket ${_selectedGraphicsType == 'gangster' ? 'Gangster' : 'Biasa'}...", textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)
+                "Menyiapkan Paket ${_selectedGraphicsType == 'gangster' ? 'Gangster' : 'Biasa'}...",
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -304,7 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
               'assets/flutter_assets/assets/bg/home_hood.webp',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) =>
-              Container(color: Color(0xFF0F172A)),
+                  Container(color: const Color(0xFF0F172A)),
             ),
           ),
           Positioned.fill(child: Container(color: Colors.black.withOpacity(0.7))),

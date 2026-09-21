@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
-// PERBAIKAN IMPORT: Sesuaikan dengan struktur file project yang benar
-import '../widgets/sidebar.dart';
 import '../widgets/server_card.dart';
 import '../widgets/server_detail_panel.dart';
 import '../services/server_query_service.dart';
-import '../models/app_config.dart'; // Perbaikan nama folder dari 'models' ke 'config'
+import '../models/app_config.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -17,7 +15,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedIndex = 1;
   late VideoPlayerController _trailerController;
   bool _isTrailerInitialized = false;
 
@@ -68,8 +65,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  // Fungsi untuk Menjalankan / Masuk Game SAMP
-  Future<void> _launchGame() async {
+  // ALUR BARU: Pindah ke Loading Screen dulu, lalu launch game SAMP
+  Future<void> _onConnectServer() async {
+    // 1. Pindah ke halaman Loading Screen
+    if (Navigator.canPop(context)) {
+      Navigator.pushNamed(context, '/loading');
+    } else {
+      Navigator.pushReplacementNamed(context, '/loading');
+    }
+
+    // 2. Menjalankan game SAMP via Native MethodChannel
     try {
       final bool success = await _gameChannel.invokeMethod('launchGame', {
         'ip': AppConfig.serverIp,
@@ -103,34 +108,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.dispose();
   }
 
-  // PERBAIKAN: Handler perpindahan halaman dari Sidebar
-  void _onItemTapped(int index) {
-    if (_selectedIndex == index) return;
-
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/dashboard');
-        break;
-      case 2:
-        Navigator.pushReplacementNamed(context, '/servers');
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/settings');
-
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    // PERBAIKAN LAYOUT: Tetapkan batas breakpoint lanskap yang benar
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final isSmallScreen = mediaQuery.size.height < 500 || mediaQuery.size.width < 700;
@@ -139,81 +118,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
       backgroundColor: const Color(0xFF0F172A),
       body: Stack(
         children: [
+          // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/bg/home_hood.webp', // Perbaikan path asset
+              'assets/bg/home_hood.webp',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF0F172A)),
             ),
           ),
+          // Dark Overlay
           Positioned.fill(
             child: Container(color: Colors.black.withOpacity(0.65)),
           ),
+          // Content (Tanpa Sidebar & Row)
           SafeArea(
-            child: Row(
-              children: [
-                // SIDEBAR
-                Sidebar(
-                  selectedIndex: _selectedIndex,
-                  onItemSelected: _onItemTapped,
-                ),
-
-                // KONTEN UTAMA
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(isSmallScreen ? 10.0 : 20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // HEADER (Title & Refresh)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Padding(
+              padding: EdgeInsets.all(isSmallScreen ? 10.0 : 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // HEADER (Title & Refresh)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "DASHBOARD",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: isSmallScreen ? 16 : 22,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.1,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    "Selamat datang, ${AppConfig.nickname}!",
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: isSmallScreen ? 11 : 13,
-                                    ),
-                                  ),
-                                ],
+                            Text(
+                              "DASHBOARD",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: isSmallScreen ? 16 : 22,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.1,
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 20),
-                              onPressed: _fetchServerData,
-                              tooltip: "Refresh Status",
-                              padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
+                            const SizedBox(height: 2),
+                            Text(
+                              "Selamat datang, ${AppConfig.nickname}!",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: isSmallScreen ? 11 : 13,
+                              ),
                             ),
                           ],
                         ),
-                        SizedBox(height: isSmallScreen ? 8 : 16),
-
-                        // BODY LAYOUT
-                        Expanded(
-                          child: isLandscape
-                              ? _buildLandscapeLayout(isSmallScreen)
-                              : _buildPortraitLayout(isSmallScreen),
-                        ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 20),
+                        onPressed: _fetchServerData,
+                        tooltip: "Refresh Status",
+                        padding: EdgeInsets.all(isSmallScreen ? 4 : 8),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  SizedBox(height: isSmallScreen ? 8 : 16),
+
+                  // BODY LAYOUT
+                  Expanded(
+                    child: isLandscape
+                        ? _buildLandscapeLayout(isSmallScreen)
+                        : _buildPortraitLayout(isSmallScreen),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -221,7 +190,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Layout Lanskap (16:9)
+  // Layout Lanskap
   Widget _buildLandscapeLayout(bool isSmall) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +208,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   playerCount: "${_serverStatus.players}/${_serverStatus.maxPlayers}",
                   ping: "${_serverStatus.ping} ms",
                   isOnline: _serverStatus.isOnline,
-                  onConnect: _launchGame, // Panggil fungsi launch game
+                  onConnect: _onConnectServer, // Mengarahkan ke alur Loading Screen -> Game
                 ),
                 SizedBox(height: isSmall ? 10 : 16),
                 _buildVideoTrailer(isSmall),
@@ -256,7 +225,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Layout Potret (Jikapun HP diputar tegak)
+  // Layout Potret
   Widget _buildPortraitLayout(bool isSmall) {
     return SingleChildScrollView(
       child: Column(
@@ -269,7 +238,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             playerCount: "${_serverStatus.players}/${_serverStatus.maxPlayers}",
             ping: "${_serverStatus.ping} ms",
             isOnline: _serverStatus.isOnline,
-            onConnect: _launchGame, // Panggil fungsi launch game
+            onConnect: _onConnectServer, // Mengarahkan ke alur Loading Screen -> Game
           ),
           SizedBox(height: isSmall ? 10 : 16),
           _buildVideoTrailer(isSmall),
@@ -342,12 +311,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: Colors.black,
               child: _isTrailerInitialized
                   ? AspectRatio(
-                      aspectRatio: _trailerController.value.aspectRatio,
-                      child: VideoPlayer(_trailerController),
-                    )
+                aspectRatio: _trailerController.value.aspectRatio,
+                child: VideoPlayer(_trailerController),
+              )
                   : const Center(
-                      child: CircularProgressIndicator(color: Color(0xFF00B4D8)),
-                    ),
+                child: CircularProgressIndicator(color: Color(0xFF00B4D8)),
+              ),
             ),
           ),
         ],

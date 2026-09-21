@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../main.dart'; // Pastikan path ini sesuai dengan struktur projectmu
-import '../widgets/sidebar.dart';
-import '../models/app_config.dart'; // BENAR
+import '../models/app_config.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -11,8 +9,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  int _selectedIndex = 3;
-
   // --- 1. PROFIL ---
   late TextEditingController _ucpNameController;
 
@@ -59,10 +55,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _saveSettings() {
     setState(() {
-      AppConfig.nickname = _ucpNameController.text.trim().isEmpty ? "Player" : _ucpNameController.text.trim();
+      AppConfig.nickname = _ucpNameController.text.trim().isEmpty
+          ? "Player"
+          : _ucpNameController.text.trim();
       AppConfig.fastConnect = _fastConnect;
       AppConfig.fpsCounter = _fpsCounter;
-      // Tambahkan penyimpanan variabel lain di sini jika diperlukan
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -90,7 +87,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Container(width: 4, height: 20, color: const Color(0xFF00B4D8)),
           const SizedBox(width: 10),
-          Text(title.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1)),
+          Text(
+            title.toUpperCase(),
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1),
+          ),
         ],
       ),
     );
@@ -148,130 +148,123 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
-      body: Row(
+      body: ListView(
+        padding: const EdgeInsets.all(32.0),
         children: [
-          Sidebar(selectedIndex: _selectedIndex, onItemSelected: _onItemTapped),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(32.0),
-              children: [
-                const Text("PENGATURAN", style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-                const Text("Sesuaikan pengalaman bermain SA-MP kamu", style: TextStyle(color: Colors.white54, fontSize: 14),),
-                const SizedBox(height: 24),
+          const Text("PENGATURAN", style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+          const Text("Sesuaikan pengalaman bermain SA-MP kamu", style: TextStyle(color: Colors.white54, fontSize: 14)),
+          const SizedBox(height: 24),
 
-                // 1. PROFIL
-                _buildSectionTitle("Profil Karakter"),
-                _buildCard([
-                  TextField(
-                    controller: _ucpNameController,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                    decoration: InputDecoration(
-                      labelText: "Nama UCP / Nickname",
-                      hintText: "Contoh: John_Doe",
-                      labelStyle: const TextStyle(color: Colors.white54),
-                      prefixIcon: const Icon(Icons.account_circle, color: Color(0xFF00B4D8)),
-                      filled: true,
-                      fillColor: const Color(0xFF0F172A),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF00B4D8), width: 2)),
-                    ),
-                  ),
-                ]),
+          // 1. PROFIL
+          _buildSectionTitle("Profil Karakter"),
+          _buildCard([
+            TextField(
+              controller: _ucpNameController,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                labelText: "Nama UCP / Nickname",
+                hintText: "Contoh: John_Doe",
+                labelStyle: const TextStyle(color: Colors.white54),
+                prefixIcon: const Icon(Icons.account_circle, color: Color(0xFF00B4D8)),
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF00B4D8), width: 2)),
+              ),
+            ),
+          ]),
 
-                // 2. AUDIO & VOICE
-                _buildSectionTitle("Audio & Onin Voice Chat"),
-                _buildCard([
-                  _buildSwitch("Aktifkan Voice Chat", "Komunikasi suara real-time dengan pemain lain", _voiceChatEnabled, (v) => setState(() => _voiceChatEnabled = v)),
-                  const Divider(color: Colors.white10),
-                  _buildSwitch("Spatial 3D Audio", "Suara mengikuti arah dan jarak karakter", _voice3D, (v) => setState(() => _voice3D = v)),
-                  _buildSwitch("Mode Push To Talk (PTT)", "Tekan tombol mic untuk berbicara (Hemat bandwidth)", _pushToTalk, (v) => setState(() => _pushToTalk = v)),
-                  const SizedBox(height: 12),
-                  _buildSlider("Volume Voice", _voiceVolume, 0, 100, (v) => setState(() => _voiceVolume = v), "%"),
-                  _buildSlider("Volume Musik (BGM)", _bgmVolume, 0, 100, (v) => setState(() => _bgmVolume = v), "%"),
-                  _buildSlider("Volume Efek (SFX)", _sfxVolume, 0, 100, (v) => setState(() => _sfxVolume = v), "%"),
-                ]),
+          // 2. AUDIO & VOICE
+          _buildSectionTitle("Audio & Onin Voice Chat"),
+          _buildCard([
+            _buildSwitch("Aktifkan Voice Chat", "Komunikasi suara real-time dengan pemain lain", _voiceChatEnabled, (v) => setState(() => _voiceChatEnabled = v)),
+            const Divider(color: Colors.white10),
+            _buildSwitch("Spatial 3D Audio", "Suara mengikuti arah dan jarak karakter", _voice3D, (v) => setState(() => _voice3D = v)),
+            _buildSwitch("Mode Push To Talk (PTT)", "Tekan tombol mic untuk berbicara (Hemat bandwidth)", _pushToTalk, (v) => setState(() => _pushToTalk = v)),
+            const SizedBox(height: 12),
+            _buildSlider("Volume Voice", _voiceVolume, 0, 100, (v) => setState(() => _voiceVolume = v), "%"),
+            _buildSlider("Volume Musik (BGM)", _bgmVolume, 0, 100, (v) => setState(() => _bgmVolume = v), "%"),
+            _buildSlider("Volume Efek (SFX)", _sfxVolume, 0, 100, (v) => setState(() => _sfxVolume = v), "%"),
+          ]),
 
-                // 3. GRAFIK
-                _buildSectionTitle("Grafik & Visual"),
-                _buildCard([
-                  DropdownButtonFormField<String>(
-                    value: _graphicsQuality,
-                    dropdownColor: const Color(0xFF0F172A),
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: "Kualitas Preset Grafik",
-                      labelStyle: const TextStyle(color: Colors.white54),
-                      filled: true,
-                      fillColor: const Color(0xFF0F172A),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    ),
-                    items: ["Rendah (Hemat Baterai)", "Sedang", "Tinggi", "Ultra (HD)"].map((q) => DropdownMenuItem(value: q, child: Text(q))).toList(),
-                    onChanged: (val) => setState(() => _graphicsQuality = val!),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildSlider("Jarak Pandang (Draw Distance)", _drawDistance, 20, 100, (v) => setState(() => _drawDistance = v), "%"),
-                  const Divider(color: Colors.white10),
-                  _buildSwitch("Bayangan Dinamis", "Tampilkan bayangan real-time pada objek", _shadowsEnabled, (v) => setState(() => _shadowsEnabled = v)),
-                  _buildSwitch("Refleksi Kendaraan", "Efek kilau cat mobil dan genangan air", _reflectionsEnabled, (v) => setState(() => _reflectionsEnabled = v)),
-                  _buildSwitch("Anti-Aliasing", "Menghaluskan tepi objek yang bergerigi", _antiAliasing, (v) => setState(() => _antiAliasing = v)),
-                ]),
+          // 3. GRAFIK
+          _buildSectionTitle("Grafik & Visual"),
+          _buildCard([
+            DropdownButtonFormField<String>(
+              value: _graphicsQuality,
+              dropdownColor: const Color(0xFF0F172A),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: "Kualitas Preset Grafik",
+                labelStyle: const TextStyle(color: Colors.white54),
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              ),
+              items: ["Rendah (Hemat Baterai)", "Sedang", "Tinggi", "Ultra (HD)"].map((q) => DropdownMenuItem(value: q, child: Text(q))).toList(),
+              onChanged: (val) => setState(() => _graphicsQuality = val!),
+            ),
+            const SizedBox(height: 16),
+            _buildSlider("Jarak Pandang (Draw Distance)", _drawDistance, 20, 100, (v) => setState(() => _drawDistance = v), "%"),
+            const Divider(color: Colors.white10),
+            _buildSwitch("Bayangan Dinamis", "Tampilkan bayangan real-time pada objek", _shadowsEnabled, (v) => setState(() => _shadowsEnabled = v)),
+            _buildSwitch("Refleksi Kendaraan", "Efek kilau cat mobil dan genangan air", _reflectionsEnabled, (v) => setState(() => _reflectionsEnabled = v)),
+            _buildSwitch("Anti-Aliasing", "Menghaluskan tepi objek yang bergerigi", _antiAliasing, (v) => setState(() => _antiAliasing = v)),
+          ]),
 
-                // 4. PERFORMA & SISTEM
-                _buildSectionTitle("Performa & Sistem"),
-                _buildCard([
-                  _buildSwitch("Fast Connect Mode", "Lewati pesan verifikasi saat masuk server", _fastConnect, (v) => setState(() => _fastConnect = v)),
-                  _buildSwitch("Auto Reconnect", "Sambung kembali otomatis jika koneksi terputus", _autoReconnect, (v) => setState(() => _autoReconnect = v)),
-                  _buildSwitch("Hemat Data (Data Saver)", "Kurangi penggunaan data untuk tekstur jarak jauh", _dataSaver, (v) => setState(() => _dataSaver = v)),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: _targetFps,
-                    dropdownColor: const Color(0xFF0F172A),
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: "Batas Maksimal FPS",
-                      labelStyle: const TextStyle(color: Colors.white54),
-                      filled: true,
-                      fillColor: const Color(0xFF0F172A),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    ),
-                    items: ["30 FPS", "60 FPS", "90 FPS", "120 FPS (Uncapped)"].map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
-                    onChanged: (val) => setState(() => _targetFps = val!),
-                  ),
-                ]),
+          // 4. PERFORMA & SISTEM
+          _buildSectionTitle("Performa & Sistem"),
+          _buildCard([
+            _buildSwitch("Fast Connect Mode", "Lewati pesan verifikasi saat masuk server", _fastConnect, (v) => setState(() => _fastConnect = v)),
+            _buildSwitch("Auto Reconnect", "Sambung kembali otomatis jika koneksi terputus", _autoReconnect, (v) => setState(() => _autoReconnect = v)),
+            _buildSwitch("Hemat Data (Data Saver)", "Kurangi penggunaan data untuk tekstur jarak jauh", _dataSaver, (v) => setState(() => _dataSaver = v)),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _targetFps,
+              dropdownColor: const Color(0xFF0F172A),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: "Batas Maksimal FPS",
+                labelStyle: const TextStyle(color: Colors.white54),
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              ),
+              items: ["30 FPS", "60 FPS", "90 FPS", "120 FPS (Uncapped)"].map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
+              onChanged: (val) => setState(() => _targetFps = val!),
+            ),
+          ]),
 
-                // 5. TAMPILAN (HUD)
-                _buildSectionTitle("Tampilan & HUD"),
-                _buildCard([
-                  _buildSwitch("Tampilkan FPS Counter", "Indikator performa frame per detik", _fpsCounter, (v) => setState(() => _fpsCounter = v)),
-                  _buildSwitch("Tampilkan Indikator Ping", "Status latensi jaringan di pojok layar", _showPing, (v) => setState(() => _showPing = v)),
-                  _buildSwitch("Getar (Vibration)", "Aktifkan getaran saat menerima notifikasi penting", _vibrationEnabled, (v) => setState(() => _vibrationEnabled = v)),
-                  const SizedBox(height: 16),
-                  _buildSlider("Skala Ukuran Chat", _chatScale, 50, 150, (v) => setState(() => _chatScale = v), "%"),
-                ]),
+          // 5. TAMPILAN (HUD)
+          _buildSectionTitle("Tampilan & HUD"),
+          _buildCard([
+            _buildSwitch("Tampilkan FPS Counter", "Indikator performa frame per detik", _fpsCounter, (v) => setState(() => _fpsCounter = v)),
+            _buildSwitch("Tampilkan Indikator Ping", "Status latensi jaringan di pojok layar", _showPing, (v) => setState(() => _showPing = v)),
+            _buildSwitch("Getar (Vibration)", "Aktifkan getaran saat menerima notifikasi penting", _vibrationEnabled, (v) => setState(() => _vibrationEnabled = v)),
+            const SizedBox(height: 16),
+            _buildSlider("Skala Ukuran Chat", _chatScale, 50, 150, (v) => setState(() => _chatScale = v), "%"),
+          ]),
 
-                const SizedBox(height: 40),
+          const SizedBox(height: 40),
 
-                // TOMBOL SIMPAN
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton.icon(
-                    onPressed: _saveSettings,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00B4D8),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      elevation: 4,
-                      shadowColor: const Color(0xFF00B4D8).withOpacity(0.4),
-                    ),
-                    icon: const Icon(Icons.save_rounded, size: 24),
-                    label: const Text("SIMPAN PERUBAHAN", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                  ),
-                ),
-                const SizedBox(height: 32), // Spacer bawah agar tidak mepet
-              ],
+          // TOMBOL SIMPAN
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: _saveSettings,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00B4D8),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 4,
+                shadowColor: const Color(0xFF00B4D8).withOpacity(0.4),
+              ),
+              icon: const Icon(Icons.save_rounded, size: 24),
+              label: const Text("SIMPAN PERUBAHAN", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
             ),
           ),
+          const SizedBox(height: 32),
         ],
       ),
     );
