@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart'; // Pastikan path ini sesuai dengan struktur projectmu
 import '../widgets/sidebar.dart';
+import '../models/app_config.dart'; // BENAR
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

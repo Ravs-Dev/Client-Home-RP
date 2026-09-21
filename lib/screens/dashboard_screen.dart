@@ -7,7 +7,7 @@ import '../widgets/sidebar.dart';
 import '../widgets/server_card.dart';
 import '../widgets/server_detail_panel.dart';
 import '../services/server_query_service.dart';
-import '../config/app_config.dart'; // Perbaikan nama folder dari 'models' ke 'config'
+import '../models/app_config.dart'; // Perbaikan nama folder dari 'models' ke 'config'
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

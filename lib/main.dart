@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // Import file project kamu
-import 'package:homeroleplay/lib/screens/main_navigation.dart';
+import 'package:homeroleplay/screens/main_navigation.dart';
+import 'screens/main_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
