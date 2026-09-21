@@ -1,6 +1,7 @@
 import 'dart:async'; // ← TAMBAHKAN INI (untuk TimeoutException)
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:homeroleplay/models/app_config.dart';
 import '../main.dart';
 
 class ServerStatus {

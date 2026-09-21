@@ -5,6 +5,7 @@ import '../widgets/sidebar.dart';
 import '../widgets/server_card.dart';
 import '../widgets/server_detail_panel.dart';
 import '../services/server_query_service.dart';
+import '../models/app_config.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -26,7 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     maxPlayers: 50,
     ping: 0,
     hostname: "HomeRoleplay",
-    gamemode: "Home Roleplay",
+    gamemode: "ravs",
     version: "0.3.7-R2",
     isMaintenance: false,
     isStorm: false,
@@ -96,7 +97,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/flutter_assets/assets/bg/splash_lowrider.webp',
+              'assets/flutter_assets/assets/bg/home_hood.webp',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF0F172A)),
             ),

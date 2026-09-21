@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/server_query_service.dart';
+import 'package:homeroleplay/models/app_config.dart';
 
 class ServerDetailPanel extends StatelessWidget {
   final ServerStatus status;
