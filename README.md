@@ -15,3 +15,10 @@ This is a private Flutter project for HomeRoleplay.
 1. Clone this repository
 2. Run `flutter pub get`
 3. Run `flutter run`
+
+## Build App
+`
+flutter clean
+flutter pub get
+flutter build apk --release --android-skip-build-dependency-validation
+`
