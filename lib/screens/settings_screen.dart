@@ -57,18 +57,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.dispose();
   }
 
-  void _onItemTapped(int index) {
-    if (_selectedIndex == index) return;
-    setState(() => _selectedIndex = index);
-
-    switch (index) {
-      case 0: Navigator.pushReplacementNamed(context, '/home'); break;
-      case 1: Navigator.pushReplacementNamed(context, '/dashboard'); break;
-      case 2: Navigator.pushReplacementNamed(context, '/servers'); break;
-      case 3: break; // Tetap di settings
-    }
-  }
-
   void _saveSettings() {
     setState(() {
       AppConfig.nickname = _ucpNameController.text.trim().isEmpty ? "Player" : _ucpNameController.text.trim();

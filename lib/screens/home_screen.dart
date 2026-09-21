@@ -119,17 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _onItemTapped(int index) {
-    if (_selectedIndex == index) return;
-    setState(() => _selectedIndex = index);
-    switch (index) {
-      case 0: break;
-      case 1: Navigator.pushReplacementNamed(context, '/dashboard'); break;
-      case 2: Navigator.pushReplacementNamed(context, '/servers'); break;
-      case 3: Navigator.pushReplacementNamed(context, '/settings'); break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // 1. Tampilkan Layar Pilihan Grafik (Jika belum pilih)

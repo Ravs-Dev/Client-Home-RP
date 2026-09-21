@@ -116,13 +116,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Navigator.pushReplacementNamed(context, '/home');
         break;
       case 1:
-        // Tetap di halaman Dashboard
+        Navigator.pushReplacementNamed(context, '/dashboard');
         break;
       case 2:
         Navigator.pushReplacementNamed(context, '/servers');
         break;
       case 3:
         Navigator.pushReplacementNamed(context, '/settings');
+
         break;
     }
   }
