@@ -1,5 +1,6 @@
 package com.example.homeroleplay
 
+import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -10,6 +11,7 @@ import java.nio.charset.Charset
 
 class MainActivity : FlutterActivity() {
 
+    // Gunakan 1 Channel Name yang konsisten dengan Dart/Flutter
     private val channelName = "homeroleplay/server"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -20,6 +22,7 @@ class MainActivity : FlutterActivity() {
             channelName
         ).setMethodCallHandler { call, result ->
             when (call.method) {
+                // 1. QUERY SERVER SA-MP
                 "queryServer" -> {
                     val host = call.argument<String>("host") ?: ""
                     val port = call.argument<Int>("port") ?: 7001
@@ -33,14 +36,24 @@ class MainActivity : FlutterActivity() {
                     }.start()
                 }
 
-                "connectToServer" -> {
-                    /*
-                     * Bagian ini nantinya digunakan untuk
-                     * membuka client SA-MP Android.
-                     *
-                     * Untuk sekarang hanya mengembalikan true.
-                     */
-                    result.success(true)
+                // 2. PELUNCURAN GAME SA-MP (LAUNCH GAME)
+                "launchGame", "connectToServer" -> {
+                    val ip = call.argument<String>("ip") ?: call.argument<String>("host") ?: ""
+                    val port = call.argument<Int>("port") ?: 7001
+                    val nickname = call.argument<String>("nickname") ?: "Player"
+
+                    try {
+                        // Memanggil Native Activity Game SA-MP
+                        val intent = Intent(this, com.nvidia.valkyrie.Gtasa::class.java)
+                        intent.putExtra("ip", ip)
+                        intent.putExtra("port", port)
+                        intent.putExtra("nickname", nickname)
+                        startActivity(intent)
+                        
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("LAUNCH_FAILED", e.message, null)
+                    }
                 }
 
                 else -> {
@@ -49,6 +62,10 @@ class MainActivity : FlutterActivity() {
             }
         }
     }
+
+    // =========================================================================
+    // HELPER METHOD & PARSER UNTUK UDP QUERY SA-MP / OPEN.MP
+    // =========================================================================
 
     private fun queryServer(
         host: String,
