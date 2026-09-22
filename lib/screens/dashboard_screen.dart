@@ -180,7 +180,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Center(
-                                Icon(Icons.play_circle_fill, color: Color(0xFF0EA5E9), size: 36),
+                                child: Icon(Icons.play_circle_fill, color: Color(0xFF0EA5E9), size: 36),
                               ),
                             )
                           ],
@@ -237,7 +237,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // Helper untuk membuat baris Informasi Kota yang rapi & kecil
   Widget _buildInfoRow(String label, String value, {bool isStatus = false}) {
     return Padding(
-      padding: const EdgeInsets.vertical(3.0),
+      padding: const EdgeInsets.symmetric(vertical: 3.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
